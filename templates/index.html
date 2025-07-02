@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Etiketleyici</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #f9fafb;
+            --accent-color: #10b981;
+            --text-color: #1f2937;
+            --light-gray: #e5e7eb;
+            --dark-gray: #6b7280;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            border: 2px dashed var(--light-gray);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        input[type="file"] {
+            padding: 0.5rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 6px;
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--primary-color);
+        }
+
+        input[type="file"]::file-selector-button {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: background 0.3s;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: #4338ca;
+        }
+
+        button {
+            padding: 0.75rem 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #status {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border-radius: 6px;
+            background-color: #f0fdf4;
+            color: #065f46;
+            font-weight: 500;
+            display: none;
+        }
+
+        #videoContainer {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #videoStream {
+            width: 100%;
+            max-width: 720px;
+            height: auto;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 1rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .upload-section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>AWS Rekognition Video Etiketleyici</h2>
+
+        <div class="upload-section">
+            <input type="file" id="videoFile" accept="video/mp4,video/x-m4v,video/*">
+            <button onclick="upload()">Gönder ve İşle</button>
+        </div>
+
+        <p id="status"></p>
+
+        <div id="videoContainer">
+            <h3>İşlenen Video Akışı</h3>
+            <img id="videoStream" src="" alt="İşlenen Video Akışı">
+        </div>
+    </div>
+
+    <script>
+        function upload() {
+            const fileInput = document.getElementById('videoFile');
+            const file = fileInput.files[0];
+            const statusElement = document.getElementById('status');
+
+            if (!file) {
+                statusElement.innerText = "Lütfen bir video seçin.";
+                statusElement.style.display = "block";
+                statusElement.style.backgroundColor = "#fef2f2";
+                statusElement.style.color = "#b91c1c";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("video", file);
+
+            statusElement.innerText = "Yükleniyor ve işleniyor...";
+            statusElement.style.display = "block";
+            statusElement.style.backgroundColor = "#eff6ff";
+            statusElement.style.color = "#1e40af";
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                statusElement.innerText = data.message;
+                statusElement.style.backgroundColor = "#f0fdf4";
+                statusElement.style.color = "#065f46";
+
+                document.getElementById('videoContainer').style.display = "block";
+                document.getElementById('videoStream').src = "/video_feed";
+            })
+            .catch(err => {
+                statusElement.innerText = "Bir hata oluştu: " + err;
+                statusElement.style.backgroundColor = "#fef2f2";
+                statusElement.style.color = "#b91c1c";
+            });
+        }
+    </script>
+</body>
+</html>
